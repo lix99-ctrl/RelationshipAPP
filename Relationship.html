@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kama Sutra - Ultimate Relationship Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    .perspective-1000 { perspective: 1000px; }
+    .preserve-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes pop {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.1); }
+     100% { transform: scale(1); opacity: 1; }
+    }
+    .trophy-unlocked { animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: { fontFamily: { serif: ['Georgia', 'serif'] } }
+      }
+    }
+  </script>
+</head>
+<body class="bg-stone-950 text-stone-100 antialiased">
+  <div id="root"></div>
+  <script type="text/babel">
+
+    // --- AUDIO & HAPTIC FEEDBACK UTILITIES ---
+    const playSound = (type = 'flip') => {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        if (type === 'flip') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(160, audioCtx.currentTime + 0.08);
+          gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.08);
+        } else if (type === 'favorite') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12);
+          gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.12);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+          gainNode.gain.setValueAtTime(0.03, audioCtx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.05);
+        }
+      } catch (e) {}
+    };
+
+    const triggerHaptic = (pattern = 15) => {
+      try {
+        if (typeof window !== 'undefined' && navigator.vibrate) {
+          navigator.vibrate(pattern);
+        }
+      } catch (e) {}
+    };
+
+    // --- MAP SYSTEM FOR UNIQUE CARD ART DESIGN VISUALS ---
+    function CodeIllustration({ category, id }) {
+      const uniqueSeed = id % 5;
+      let primaryColor = "#10b981"; 
+      let fillBg = "#064e3b";
+
+      if (category === 'Spicy' || category === 'Midnight Express') { primaryColor = "#f43f5e"; fillBg = "#4c0519"; }
+      else if (category === 'Deep Connection' || category === 'Soul Sync' || category === 'Dopamine Sync') { primaryColor = "#38bdf8"; fillBg = "#0c4a6e"; }
+      else if (category === 'Wildcards' || category === 'Slow Burn') { primaryColor = "#a855f7"; fillBg = "#4c1d95"; }
+
+      return (
+        <svg viewBox="0 0 200 150" className="w-full h-full fill-none stroke-[1.5]" style={{ stroke: primaryColor }}>
+          <rect width="200" height="150" fill="#141110"/>
+          <g opacity="0.15">
+            <circle cx="100" cy="75" r="55" stroke="#f4f4f5" />
+            <path d="M 20,75 L 180,75 M 100,15 L 100,135" stroke="#f4f4f5" strokeDasharray="3,3" />
+          </g>
+          {uniqueSeed === 0 && (
+            <g>
+              <path d="M65,95 C65,65 85,50 100,50 C115,50 135,65 135,95 Z" fill={fillBg} fillOpacity="0.25"/>
+              <path d="M100,90 C80,90 70,65 100,35 C130,65 120,90 100,90 Z" fill="#f4f4f5" fillOpacity="0.1"/>
+              <circle cx="100" cy="45" r="7" fill={primaryColor} />
+            </g>
+          )}
+          {uniqueSeed === 1 && (
+            <g>
+              <path d="M45,105 C75,45 125,45 155,105" strokeWidth="2.5" />
+              <circle cx="95" cy="55" r="6" fill="#f4f4f5" />
+              <circle cx="120" cy="60" r="6" fill={primaryColor} />
+            </g>
+          )}
+          {uniqueSeed === 2 && (
+            <g>
+              <path d="M35,65 C75,45 125,85 165,65" strokeWidth="2" />
+              <circle cx="70" cy="50" r="6" fill="#f4f4f5" />
+              <circle cx="75" cy="70" r="6" fill={primaryColor} />
+            </g>
+          )}
+          {uniqueSeed === 3 && (
+            <g>
+              <line x1="100" y1="25" x2="100" y2="125" strokeWidth="3" />
+              <circle cx="100" cy="20" r="6" fill="#f4f4f5" />
+              <circle cx="120" cy="35" r="5" fill={primaryColor} />
+            </g>
+          )}
+          {uniqueSeed === 4 && (
+            <g>
+              <path d="M50,75 Q100,25 150,75 T250,75" strokeWidth="2"/>
+              <circle cx="150" cy="75" r="5" fill="#f4f4f5" />
+            </g>
+          )}
+        </svg>
+      );
+    }
+
+    const generateCompleteDeck = () => {
+      const deck = [];
+      let globalId = 1;
+
+      const mild = [
+        { title: "Sensory Reset", text: "Close your eyes for 60 seconds while your partner uses their fingertips to trace light patterns over your face, neck, and collarbones. Focus entirely on the variance of touch pressure.", tip: "Keep breathing rhythmic and slow down internal pacing completely." },
+        { title: "The Trace Game", text: "Using a single finger, trace an unwritten word or simple symbol onto your partner's bare back. They must focus intently to guess what you are spelling out.", tip: "Vary the pacing and speed of your movements to increase sensory focus." },
+        { title: "Featherlight Touch", text: "Hover your palms less than a millimeter above your partner’s bare skin without making direct, heavy structural contact. Let the static warmth bridge the gap.", tip: "Move slow enough to feel the radiant body heat dynamic." },
+        { title: "Breathing Duet", text: "Sit cross-legged facing one another with your hands placed flat against each other's chests. Sync your inhalations and exhalations perfectly for 2 minutes.", tip: "Maintain uninterrupted, soft eye contact throughout this phase." },
+        { title: "Mirror Movement", text: "Place your hands flat against your partner's hands without interlocking fingers. One partner initiates slow, fluid movements; the other must mirror them instantly.", tip: "Let the leadership flow naturally back and forth without speaking words." },
+        { title: "Palm Harmony", text: "Interlace your fingers completely with your partner's fingers, closing any structural gaps. Press your palms together firmly and close your eyes, focusing solely on the pulse in your hands.", tip: "Avoid moving or rubbing; seek total stillness for maximum focus." },
+        { title: "Hairline Release", text: "Have one partner lie back while the other gently massages their temples, forehead, and hairline using slow, rhythmic circular compressions.", tip: "Use high focus to read physical cues of facial muscle relaxation." },
+        { title: "Scent Isolation", text: "Bury your face gently in the crook of your partner's neck or collarbone. Take 5 deep, slow breaths, focusing purely on their unique natural scent matrix.", tip: "Block out ambient noise and center your awareness on this single sense." },
+        { title: "Shoulder Release", text: "Stand behind your partner and apply firm, grounding pressure downward onto their shoulder muscles using the heels of your hands.", tip: "Coordinate your hand compressions with their deep exhalations." },
+        { title: "The Thumb Lock", text: "Grasp hands firmly but only engage your thumbs in a locked, intertwined hold. Maintain this subtle touch connection while conversing naturally.", tip: "Notice how a small, deliberate anchor point grounds physical presence." },
+        { title: "Vertebrae Walk", text: "Have your partner lie face down. Use both of your thumbs to trace small, slow circles on either side of their spine, moving from lower back to neck.", tip: "Keep your pace steady; do not rush the ascent up the back." },
+        { title: "Cheek Cradle", text: "Gently place both of your hands on the sides of your partner's face, framing their jawline with your fingers while looking closely into their eyes.", tip: "Let your hands rest with natural warmth without applying crushing force." },
+        { title: "The Blind Walk", text: "Blindfold your partner and lead them gently by the hand through the room, using slow, protective guidance cues to navigate space safely.", tip: "Building non-verbal trust requires highly deliberate, predictable movements." },
+        { title: "Earlobe Pulse", text: "Lightly massage your partner’s earlobes and the outer rim of their ears using the tips of your thumbs and index fingers.", tip: "This area is highly sensitive; keep your touch exceptionally light." },
+        { title: "Forehead Rest", text: "Sit facing each other and lean forward until your foreheads touch gently. Close your eyes and breathe quietly together in this joined position.", tip: "Allow the weight of your heads to balance naturally without pushing." },
+        { title: "Wrist Pulse Alignment", text: "Lightly hold your partner's wrist, placing your index and middle fingers over their radial pulse until you can feel their heartbeat clearly.", tip: "Close your eyes to dial in your focus on their internal physical rhythm." },
+        { title: "Ankle Release", text: "With your partner resting on their back, cradle their heels in your hands and apply a very gentle, steady pull outward to decompress lower body tension.", tip: "Hold the gentle tension for at least 30 seconds before releasing." },
+        { title: "Tension Sweep", text: "Use the flat palms of your hands to sweep firmly down your partner’s arms, from shoulders to fingertips, as if sweeping away physical stress.", tip: "Maintain a continuous, unbroken stroke from start to finish." },
+        { title: "The Slow Embrace", text: "Wrap your arms around your partner in a complete hug, holding each other securely without moving or rocking for 90 full seconds.", tip: "Let your muscles fully relax into your partner's structural support." },
+        { title: "Joint Warmth", text: "Cup your warm hands directly over your partner's knees or elbows, holding them still to let your body heat transfer through their joints.", tip: "Focus on the sensory transition of cold skin warming up safely." },
+        { title: "Temple Sweep", text: "Using the pads of your thumbs, lightly slide outward from the center of your partner's eyebrows across to their temples.", tip: "Repeat this motion smoothly with uniform, ultra-light tracking force." },
+        { title: "Jawline Release", text: "Use your fingertips to find where your partner’s jaw meets their ear, applying soft, circular pressure to unpack hidden clenching patterns.", tip: "Encourage them to let their mouth open slightly to maximize release." },
+        { title: "Eyelid Shadow", text: "Place your warm palms gently over your partner's closed eyes without pressing down on the eyeballs, creating total, warm darkness for them.", tip: "Hold this position until they take three deep, relaxed belly breaths." },
+        { title: "Fingertip Greeting", text: "Bring the pads of your fingers into direct alignment with your partner's fingertips, pressing lightly so just the skin profiles meet.", tip: "Focus on the tiny, intricate sensations of warmth at the contact points." },
+        { title: "Collarbone Trace", text: "Slowly track a horizontal path across your partner's collarbones using the back of your hand, enjoying the unique contour definition.", tip: "Move with an incredibly light touch to awaken surface skin nerves." },
+        { title: "Nape Warmth", text: "Place one full palm flush against the back of your partner's neck, holding it there to offer grounding, structural safety.", tip: "Let the weight of your hand match their natural posture effortlessly." },
+        { title: "The Foot Cradle", text: "Rest your partner's foot in your lap and use both hands to firmly squeeze the arch, heel, and ball of the foot with intentional, supportive pressure.", tip: "Firm pressure avoids tickling reactions and feels much more grounded." },
+        { title: "Lower Back Base", text: "Place both flat palms on your partner's lower back while they sit upright, offering a solid structural support system behind them.", tip: "Visualize pushing warm, stabilizing energy directly into their core frame." },
+        { title: "The Whisper Breath", text: "Lean close to your partner's ear and exhale a long, slow breath without making a sound or speaking any words.", tip: "The thermal contrast of moving air creates an instant sensory anchor." },
+        { title: "Quiet Coexistence", text: "Lie side-by-side with your backs completely flat against each other, feeling the movement of each other's lungs against your spine.", tip: "Sync your breathing patterns to feel unified without looking at each other." }
+      ];
+
+      const spicy = [
+        { title: "The Lotus Position", text: "Partner A sits cross-legged. Partner B mounts, straddling their thighs completely and wrapping their legs around A's waist. Intimacy is high as chest surfaces lock flat.", tip: "Rock gently using minor core shifts rather than forceful thrusting movements." },
+        { title: "The Elevated Bridge", text: "Partner B lies flat, placing feet firmly down to arch their hips high into a bridge formation. Partner A kneels over them, driving vertically downwards.", tip: "Partner A can support Partner B's lower back to reduce core fatigue." },
+        { title: "The Horizon", text: "Both partners lie on their sides facing each other, creating a scissor configuration with intersecting legs to facilitate shallow, highly controlled friction grids.", tip: "Keep alignment tightly wound for premium sensory connection loops." },
+        { title: "The Standing Embrace", text: "Partner A stands tall, lifting Partner B up securely against a flat wall structure. Partner B locks their thighs tightly around Partner A's midsection.", tip: "Partner A should bend their knees slightly to maintain absolute solid leverage." },
+        { title: "The Waterfall", text: "Partner B lies back on the edge of the bed frame, dropping their upper torso backwards over the precipice. Partner A stands or kneels on the floor, driving straight in.", tip: "Ensure the head drop position remains supported and completely comfortable." },
+        { title: "The Modified Tiger", text: "Partner B assumes an all-fours stance, dropping their spine low to arch their glutes skyward. Partner A enters closely from behind at a parallel angle matrix.", tip: "Resting on forearms can alter the entry angle instantly if desired." },
+        { title: "The Velvet Cage", text: "Partner B lies flat on their back, bringing knees fully to chest or over shoulders. Partner A slides deeply forward, pressing their chest down against B's shins.", tip: "This angle maximises internal pressure zones; move smoothly." },
+        { title: "The Catalyst", text: "Partner A sits upright on the edge of a chair or bed structure. Partner B sits directly facing them on their lap, planting their heels down onto the surface edge.", tip: "Use the leverage of your feet to control the vertical rate of motion." },
+        { title: "Ice & Fire Contrast", text: "Take a piece of ice or a warm drink, then trace your lips and fingers along your partner's sensitive zones to create an intense thermal playground.", tip: "Communicate clearly with your eyes to gauge response rates to temperature changes." },
+        { title: "The Arching Swan", text: "Partner B kneels, leaning forward to rest their chest flat on a stack of pillows while keeping their hips elevated high. Partner A enters smoothly from behind.", tip: "The pillows eliminate back strain, letting you focus completely on deep depth control." },
+        { title: "The Ascent", text: "Partner A sits on a sturdy desk or table edge with legs hanging over. Partner B stands between their thighs, lifting A's legs up onto their shoulders before entry.", tip: "This standing leverage allows Partner B to set an excellent rhythmic pace." },
+        { title: "The Cleopatra", text: "Partner B lies on their side. Partner A approaches perpendicularly, lifting B's top leg high onto their waist to open up an angled entry pathway.", tip: "This offers full visual access to your partner's expressions during motion." },
+        { title: "Blindfold Sensation exploration", text: "Blindfold Partner B securely. Partner A uses three different textures (satin, feathers, lips) across their body, requiring B to guess the material.", tip: "Slowing down sensory input heightens sexual excitement significantly." },
+        { title: "The Gilded Anchor", text: "Partner B lies on their back with a pillow under their hips. Partner A kneels over them, pulling B’s feet forward to lock firmly against A’s chest structure.", tip: "The hip elevation creates a premium angle for consistent internal stimulation." },
+        { title: "The Cross Scissors", text: "Partner B lies on their side while Partner A lies flat on their stomach perpendicularly, intertwining legs to create an elegant, tight-fitting lock.", tip: "Focus on shallow, circular grinds rather than standard vertical thrusts." },
+        { title: "The Amazon Stand", text: "Partner A lies flat on their back. Partner B mounts on top, facing forward, but stands fully on their feet in a deep squat position rather than kneeling.", tip: "Partner B enjoys absolute control over depth, velocity, and pacing rhythms." },
+        { title: "The Modified Cradle", text: "Partner A sits with legs extended straight out. Partner B slides onto their lap facing away from them, leaning their spine flat against A's chest.", tip: "Wrap your arms around your partner's torso to sync movements and breathing." },
+        { title: "Feathered Warmth Routine", text: "Use a soft brush or feather to lightly trace lines from the inner thigh upward to the core zone without making direct contact with the center.", tip: "Build anticipation by teasing the surrounding boundaries before closing in." },
+        { title: "The Split Horizon", text: "Partner B lies on their side with one leg straight and the other lifted high. Partner A kneels between the legs to find a unique, tight entry path.", tip: "Use your hands to anchor onto your partner’s hips for steady tracking control." },
+        { title: "The High Chair", text: "Partner A sits on a high chair. Partner B straddles them facing forward, using the chair arms or backrest for maximum physical leverage.", tip: "This position keeps eye contact and kissing options wide open." },
+        { title: "The Valedictorian", text: "Partner B lies on the absolute edge of a high bed. Partner A stands on the floor, lifting B's ankles up to lock around A's neck frame.", tip: "Keep your pacing smooth; the vertical angle offers intense deep depth." },
+        { title: "The Deep Arc", text: "Partner B rests on their upper back with legs pointing straight up into the air, while Partner A anchors their body weight over them tightly.", tip: "Partner A should use their hands to support B's lower back frame securely." },
+        { title: "Lubricant Slow-Mo", text: "Pour warm intimate lubricant onto your partner's back or chest, then use your entire forearm to slide across their skin in slow, heavy strokes.", tip: "Maximize skin-to-skin contact surface area to create an intense sensory wave." },
+        { title: "The Twisted Vine", text: "Partner B lies flat on their back, crossing one leg tightly over the other. Partner A enters from the open side, creating a unique, close-fitting pathway.", tip: "The leg cross naturally tightens the sensation loop for both partners." },
+        { title: "The Seated Helix", text: "Both partners sit facing each other on a soft surface, interlocking arms and legs to rotate their hips together in a circular grinding pattern.", tip: "Focus completely on the friction contact rather than speed metrics." },
+        { title: "The Reverse Waterfall", text: "Partner B kneels on the bed facing away from the edge, leaning their head and arms down toward the floor while keeping their hips elevated high.", tip: "Ensure the knees are well-padded with blankets for ideal comfort balance." },
+        { title: "The Mountain Climb", text: "Partner A lies on an incline or pile of large cushions. Partner B mounts from above, sliding down into alignment while keeping full eye contact.", tip: "This position combines relaxation with exceptional core angle variety." },
+        { title: "The Pendulum Movement", text: "While joined in a close position, shift your focus away from standard thrusting to rock your pelvises back and forth like an undulating pendulum.", tip: "This approach changes internal pressure points without requiring much effort." },
+        { title: "Satin Slide Tease", text: "Place a silk or satin sheet between your bare bodies and rub your chests and thighs together vigorously before removing the fabric barrier.", tip: "The sudden shift to direct skin-to-skin contact feels incredibly intense." },
+        { title: "The Final Ascent", text: "Partner B lies flat on their stomach with a pillow under their lower belly. Partner A slides on top from behind, remaining completely flat against B's back.", tip: "This creates an exceptionally snug fit; keep your movements slow and deliberate." }
+      ];
+
+      const deep = [
+        { title: "The Dopamine Sync", text: "Look directly into your partner's left eye without blinking or breaking posture for 90 continuous seconds. Share zero verbal statements or physical movements.", tip: "Allow your facial muscles to drop all standard social masks." },
+        { title: "The Fantasy Blueprint", text: "Reveal one highly specific desire or physical scenario you have thought about but never spoken aloud. Your partner must listen without judgment.", tip: "Validate the disclosure immediately before adding your thoughts." },
+        { title: "Vulnerability Trade", text: "Answer honestly: What is one insecurity you currently carry regarding physical intimacy, and how can your partner best provide reassurance?", tip: "Speak gently, treating your partner's response with protective care." },
+        { title: "The Gratitude Echo", text: "Take turns stating three highly precise things your partner does during intimacy that make you feel valued, chosen, and fully safe.", tip: "Focus on actions that build your emotional connection framework." },
+        { title: "Fear Disclosure", text: "Share a boundary or hesitation you've felt past or present. Discuss how you both can establish clearer safety cues during high-intensity rounds.", tip: "Treat this conversation as tactical teamwork to optimize future trust." },
+        { title: "The Future Map", text: "Describe a shared adventure, trip, or milestone you want to achieve with your partner over the next three years, detailing the exact emotions you want to feel.", tip: "Focus on the shared feeling of accomplishment rather than just logistics." },
+        { title: "The Unspoken Thank You", text: "Hold your partner's hands, look into their eyes, and share one small everyday action they do that you often notice but rarely explicitly thank them for.", tip: "Slowing down to appreciate micro-moments strengthens the relationship foundation." },
+        { title: "The Apology Bridge", text: "Own up to one minor moment from the past week where you were emotionally distant, impatient, or distracted, and state how you plan to handle it better next time.", tip: "Taking clear ownership cuts out defensiveness before it can start." },
+        { title: "Emotional Check-In", text: "Ask your partner: 'What area of your life currently feels the heaviest, and how can I best show up to support your load this week?'", tip: "Listen closely without trying to fix the problem; simply offer your presence." },
+        { title: "The Joy Archive", text: "Reminisce together about the exact moment you both realized you were falling in love. Share details about what the air felt like, what you wore, and your internal thoughts.", tip: "Reliving early positive bonding moments resets relationship chemistry." },
+        { title: "The Shadow Question", text: "Share one personal habit or pattern you know you carry that can make you difficult to love sometimes, and express appreciation for your partner's patience.", tip: "Self-awareness is a huge accelerator for emotional intimacy." },
+        { title: "The Safe Word Check", text: "Review your physical and emotional boundaries together. Make sure your intimate safety signals and safe words are clear, updated, and fully understood.", tip: "Clear boundaries create a safe space for much deeper intimacy." },
+        { title: "The Core Acknowledgment", text: "Look at your partner and complete this sentence: 'I admire the way you handled ______ recently because it showed your true character.'", tip: "Focusing on character traits builds deep, long-lasting emotional security." },
+        { title: "The Forgiveness Cleanse", text: "Bring up one lingering minor irritation or misunderstanding from the past, explicitly state that you are letting it go, and commit to moving forward.", tip: "Clearing out emotional residue keeps the relationship dynamic fresh." },
+        { title: "The Inner Child Share", text: "Tell your partner about a childhood memory that shaped how you handle conflict or affection today.", tip: "Understanding your partner's past helps you make sense of their current needs." },
+        { title: "Intimacy Goal Setting", text: "Agree on one small habit you can both start doing this week to prioritize each other (e.g., a tech-free coffee chat or a morning embrace).", tip: "Consistent micro-habits outlast rare grand gestures every single time." },
+        { title: "The Reassurance Loop", text: "Hold your partner closely and repeat aloud: 'I am fully committed to you, I value our partnership, and I am right here with you.'", tip: "Hearing clear verbal reassurance helps quiet hidden anxieties." },
+        { title: "The Admiration Swap", text: "Name one physical feature and one internal personality trait of your partner that you find sexier today than when you first met.", tip: "Highlighting long-term growth keeps attraction alive and thriving." },
+        { title: "The Listening Mirror", text: "Have your partner talk for two minutes about their day. When they finish, summarize what they said and mirror back the emotions they felt before replying.", tip: "Feeling truly heard is directly tied to feeling deeply loved." },
+        { title: "The Dream Disclosure", text: "Share a personal goal or dream you feel hesitant to voice to the world because you are afraid of failing.", tip: "Sharing your raw ambitions builds immense trust within your partnership." },
+        { title: "The Boundary Check", text: "Ask your partner: 'Is there any area in our relationship where you feel I am unintentionally crossing a boundary or crowding your space?'", tip: "Respecting boundaries prevents burnout and keeps the connection healthy." },
+        { title: "The Love Language Audit", text: "Discuss whether you have felt loved and appreciated recently through your primary love language, and how you can fine-tune your actions.", tip: "Make your requests specific and actionable so your partner can succeed." },
+        { title: "The Vulnerable Ask", text: "Complete this statement honestly: 'The easiest way for you to make me feel safe when I am upset or overwhelmed is to ______.'", tip: "Give your partner a clear playbook on how to support you best." },
+        { title: "The Touch Feedback", text: "Discuss your physical intimacy openly: What pace, touch style, or connection routine has felt most satisfying recently?", tip: "Frame your feedback around what you love to keep things positive." },
+        { title: "The Trust Anchor", text: "Name a specific crisis or difficult moment from your past that you overcame together, and highlight the teamwork that got you through.", tip: "Remembering shared victories reinforces the strength of your bond." },
+        { title: "The Growth Review", text: "Share one way you feel you have grown as an individual because of your partner's positive influence on your life.", tip: "Expressing gratitude for personal growth deepens your mutual respect." },
+        { title: "The Energy Check", text: "Rate your current emotional energy level from 1 to 10 out loud. Explain why you feel that way so your partner can understand your headspace.", tip: "Sharing your energy levels cuts down on misunderstandings about mood shifts." },
+        { title: "The Secret Pride", text: "Tell your partner about an accomplishment you achieved recently that you feel proud of, even if it seems small or insignificant.", tip: "Celebrate each other's small wins to build a supportive ecosystem." },
+        { title: "The Healing Whisper", text: "Think of an old emotional wound or negative belief your partner carries, look at them, and gently reassure them that they are safe and loved.", tip: "Your words hold immense power to help heal your partner's past hurts." },
+        { title: "The Soul Anchor", text: "Sit in complete silence while holding hands for 2 minutes, focusing entirely on the profound feeling of being in the same room together.", tip: "Silence lets you focus on your partner's presence without any distractions." }
+      ];
+
+      const wild = [
+        { title: "Double or Nothing", text: "The person who drew this card selects the next action parameters. The receiver must execute the next card drawn for double its standard duration metric.", tip: "Choose the upcoming pace wisely based on your partner's energy." },
+        { title: "Role Swap", text: "Instantly flip active dynamics. If you were the primary initiator of physical movement, you must now become entirely receptive, letting your partner lead.", tip: "Shift frames smoothly without breaking physical contact." },
+        { title: "The Quiet Challenge", text: "For the next full card sequence, both partners must remain entirely silent. No spoken words allowed. Communication must happen via touch vector changes.", tip: "Listen closely to your partner’s breath changes to track their feedback." },
+        { title: "Blind Choice", text: "Draw the next two cards from the deck without looking. Your partner selects one to keep active and discards the other into the box face down.", tip: "Trust your partner’s selection implicitly to keep the sequence fluid." },
+        { title: "Time Freeze", text: "Freeze instantly in your current physical position for 45 seconds. No movement, adjustments, or repositioning allowed until the countdown hits zero.", tip: "Focus heavily on the internal physical sensations during the stillness." },
+        { title: "The Wild Reset", text: "Reshuffle the active deck instantly. The receiver must immediately perform a 30-second neck massage for the drawer before the next card can be pulled.", tip: "Use this break to check in on physical comfort levels." },
+        { title: "Dice Dictator", text: "Flip a coin or roll an imaginary die. If it lands on heads, you control the positioning variables of the next card. If tails, your partner takes the lead.", tip: "Embrace the random outcome to add a playful sense of surprise." },
+        { title: "The Slow Motion Round", text: "The next intimate card drawn must be performed at one-quarter of your normal speed. Every movement must be incredibly slow and deliberate.", tip: "Slowing down your movements can significantly intensify physical sensations." },
+        { title: "The Eyes Locked Test", text: "During the entire execution of the next card, both partners must maintain continuous eye contact. Breaking eye contact extends the timer by 30 seconds.", tip: "This constraint transforms simple physical movements into a deep connection." },
+        { title: "The Free Choice Token", text: "Keep this card nearby. You can play it at any moment to skip a card you don't feel like doing, or to repeat a card you both thoroughly enjoyed.", tip: "Use this card to comfortably tailor the experience to your exact mood." }
+      ];
+
+      const newSlowBurnCards = [
+        { title: "The Temperature Pulse", text: "Hold a cool metallic item or ice pack securely in your palm for a minute, then immediately rest that hand over your partner's warm bare chest.", tip: "Thermal contrast shifts neurological focus entirely to the surface skin grid." },
+        { title: "The Five-Minute Pause", text: "Wrap into a complete, locked frontal embrace and maintain total stillness for 300 seconds without shifting layout or speaking any words.", tip: "Removing movement metrics leaves room for shared respiratory rhythms to align." },
+        { title: "Subtle Friction", text: "Rest your thigh lightly against your partner's leg while sitting next to each other, maintaining a steady point of body contact without shifting.", tip: "Small, continuous points of contact build sustained underlying awareness." },
+        { title: "The Unspoken Countdown", text: "Set a silent timer for three minutes. Spend the entire duration passing a single breath back and forth via close proximity without touching.", tip: "Focus entirely on the rhythmic warmth of your shared breathing space." },
+        { title: "The Gradual Press", text: "Place your hand flat on your partner's back and increase the pressure by an imperceptible amount every ten seconds until you reach firm weight.", tip: "Ultra-gradual changes keep the nervous system calm while deepening sensation." },
+        { title: "The Extended Gaze", text: "Sit cross-legged four feet apart. Close your eyes, take three deep breaths, open them, and hold an unbroken gaze for two full minutes.", tip: "Letting go of initial awkwardness opens up deep emotional resonance." },
+        { title: "Static Warmth", text: "Hold your palms one inch apart from your partner's palms without touching, sensing the heat field between your hands for 90 seconds.", tip: "Notice how body heat creates an energetic boundary even without direct contact." },
+        { title: "The Slow Sweep", text: "Take one full minute to slide your hand from your partner's inner wrist up to their shoulder, moving at a pace so slow it is barely perceptible.", tip: "Extreme slowness forces skin receptors to fire with maximum intensity." },
+        { title: "Resting Weight", text: "Lie side-by-side and drape one leg completely over your partner's legs, letting the full, relaxed weight of your limb rest there for two minutes.", tip: "Allowing your body to completely dead-weight builds deep physical trust." },
+        { title: "The Pulse Match", text: "Hold your partner's wrist and match the rhythm of your own breathing precisely to the cadence of their underlying heartbeat.", tip: "Internal synchronization creates a profound sense of shared calm." },
+        { title: "The Silhouette Trace", text: "Trace the outline of your partner's profile with your eyes from across the room, noting every subtle contour without rushing.", tip: "Observation from a short distance builds quiet, appreciative desire." },
+        { title: "The Drift", text: "Rest your head gently against your partner's shoulder while sitting upright, staying completely still as they adjust to your weight.", tip: "Letting someone carry your weight fosters deep physical security." },
+        { title: "The Warm Release", text: "Cup your hands over your partner's shoulders and hold them entirely motionless until you feel their muscle tension visibly drop.", tip: "Patience and steady warmth allow the body to let go naturally." },
+        { title: "The Contour Study", text: "Use your fingertips to map out the unique bone structure of your partner's collarbone and shoulders with feather-light precision.", tip: "Focus on discovering familiar territory as if for the very first time." },
+        { title: "The Rhythm Anchor", text: "Sit facing each other, place your hands on each other's knees, and tap a slow, steady 4-beat rhythm back and forth together.", tip: "Shared rhythmic actions ground both minds in the present moment." },
+        { title: "The Silent Shift", text: "Slowly transition from sitting side-by-side to leaning against each other over the course of 60 seconds without saying a word.", tip: "Moving in slow motion heightens your awareness of your shared space." },
+        { title: "The Vapor Trace", text: "Exhale a warm breath gently across your partner's bare forearm, letting the temperature difference create an immediate goosebump wave.", tip: "Subtle thermal shifts are powerful triggers for skin awareness." },
+        { title: "The Center Line", text: "Lie facing each other with your noses just inches apart, sharing the exact same pocket of air for ten slow, deliberate breath cycles.", tip: "Total respiratory sharing deepens intimacy instantly." }
+      ];
+
+      const newSoulSyncCards = [
+        { title: "The Digital Compartment", text: "Open a fresh shared note together. Each partner takes turns typing in 1 deep emotional query, 1 dynamic fantasy, and 1 sensory challenge for next week.", tip: "Creating shared futures reinforces long-term partnership predictability safety parameters." },
+        { title: "The Appreciation Loop", text: "Look closely at your partner and name three distinct choices they made today that explicitly reduced your day-to-day emotional load.", tip: "Targeting modern daily actions shows that you notice real-time contributions." },
+        { title: "The Core Memory", text: "Describe a quiet, seemingly insignificant moment from your relationship where you felt completely safe and unconditionally loved by your partner.", tip: "Sharing micro-memories highlights the solid bedrock of your bond." },
+        { title: "The Unvoiced Need", text: "Share one thing you have been needing more of from your partner emotionally over the last month, framing it as a desire rather than a critique.", tip: "Vulnerability without accusation creates an instant bridge to closeness." },
+        { title: "The Future Anchor", text: "Describe a vivid picture of what a peaceful Sunday morning will look like for the two of you ten years from now down to the smallest detail.", tip: "Co-creating a long-term vision aligns your hearts on where you are heading." },
+        { title: "The Release of Control", text: "Admit to one area of your life where you struggle to let go of control, and discuss how your partner can help you feel safe enough to soften.", tip: "Sharing control struggles invites your partner to be your sanctuary." },
+        { title: "The Compliment Mirror", text: "Tell your partner one trait they possess that you secretly try to emulate in your own life because you admire it so deeply.", tip: "Deep admiration strengthens mutual respect and deep-seated affection." },
+        { title: "The Safe Haven", text: "Complete this statement: 'When the outside world feels overwhelming, the exact thing you do that makes me feel safe is...'", tip: "Naming your partner's comforting habits reinforces their value to you." },
+        { title: "The Past Perspective", text: "Reflect on a past argument you resolved successfully and identify the exact moment the dynamic shifted from conflict back to connection.", tip: "Analyzing past victories gives you a roadmap for future harmony." },
+        { title: "The Joy Investment", text: "Share one hobby or interest your partner has that you want to actively support, learn more about, or participate in with them this month.", tip: "Showing genuine interest in their passions feeds emotional alignment." },
+        { title: "The Fear Translation", text: "Translate a current stressor or anxiety you are holding onto into the core underlying fear driving it, and share it with your partner.", tip: "Revealing the root fear rather than surface frustration builds true empathy." },
+        { title: "The Gratitude Shift", text: "Name a difficult trait or quirk your partner has that used to frustrate you, but which you now appreciate as part of their unique charm.", tip: "Acceptance of all facets of your partner builds unconditional love." },
+        { title: "The Ideal Support", text: "Describe how you prefer to be comforted when you are sad versus when you are angry, so your partner always knows your exact blueprint.", tip: "Clear emotional instructions prevent guesswork during tough times." },
+        { title: "The Hidden Pride", text: "Share a private aspect of your relationship—something tiny you do together—that brings you an immense sense of warmth and belonging.", tip: "Celebrating your private rituals deepens your exclusive bond." },
+        { title: "The Apology Audit", text: "Discuss what a truly meaningful apology looks like to each of you, ensuring you both know how to know how to repair effectively after friction.", tip: "Mastering repair work is the ultimate secret to long-term relationship health." },
+        { title: "The Trust Inventory", text: "Share a specific moment in the past year where your partner's loyalty or steadfastness made you feel completely anchored.", tip: "Explicitly acknowledging loyalty solidifies the foundation of trust." },
+        { title: "The Energy Match", text: "Discuss how your daily energy rhythms differ, and brainstorm one way you can accommodate each other's cycles better this week.", tip: "Practical alignment reduces friction in daily living patterns." },
+        { title: "The Silent Affirmation", text: "Hold your partner's face in your hands, look deeply into their eyes, and mentally list three reasons you choose them every single day.", tip: "Conscious choice keeps active love alive far beyond initial infatuation." }
+      ];
+
+      const newMidnightExpressCards = [
+        { title: "The Acceleration Gate", text: "Set a rolling physical timer for exactly three minutes. The active partner drives movement at double their standard tempo until it rings.", tip: "Sudden speed variance can rapidly escalate physical tension thresholds." },
+        { title: "The Blindfold Symphony", text: "Completely blindfold your partner, then trace three radically different structural materials (e.g., hair, steel, warm lips) down their core layout.", tip: "Severing visual metrics demands high intuition to trace physical boundaries." },
+        { title: "The Sudden Shift", text: "Mid-movement, completely freeze for ten seconds while remaining fully joined, then resume at an entirely different, rapid cadence.", tip: "Unpredictable pacing changes keep the nervous system electrified." },
+        { title: "The Wall Anchor", text: "Press your partner firmly against a flat wall structure, lifting their hips slightly to alter the entry angle into a steep, high-friction vector.", tip: "Leverage against a solid wall allows for deep, controlled intensity." },
+        { title: "The Edge Control", text: "Drive the pace close to peak arousal, then abruptly drop all movement to a slow crawl for thirty seconds before accelerating again.", tip: "Mastering start-stop control amplifies the intensity of the experience." },
+        { title: "The Overdrive Surge", text: "For sixty seconds straight, push every variable—speed, depth, and pressure—to maximum velocity without holding back.", tip: "Brief bursts of unbridled intensity unleash raw passion." },
+        { title: "The Deep Drive", text: "Slow down completely to deep, deliberate, full-extension strokes that maximize internal pressure and prolonged contact.", tip: "Deep, slow movement creates a completely different kind of high-heat intensity." },
+        { title: "The Grip Matrix", text: "Anchor your hands firmly onto your partner's hips or lower back, locking your fingers in place to dictate a tight, unyielding rhythm.", tip: "Firm grip mechanics eliminate wasted motion and maximize impact." },
+        { title: "The Standing Surge", text: "Lift your partner completely off the surface, wrapping their legs around your waist as you drive forward against an upright support.", tip: "Lifting body weight adds an element of raw, physical exertion and excitement." },
+        { title: "The Rapid Switch", text: "Switch active roles instantly on your partner's signal without breaking physical connection, letting them take full control of the velocity.", tip: "Fluid role-switching keeps power dynamics playful and electric." },
+        { title: "The Friction Burn", text: "Use quick, short, shallow strokes concentrated entirely on high-sensitivity external zones to build immediate surface heat.", tip: "Shifting from deep movement to shallow friction targets entirely different nerve endings." },
+        { title: "The Blind Sprint", text: "Blindfold the receiving partner and increase the tempo rapidly for two minutes straight without any verbal warnings or cues.", tip: "Removing sight amplifies the shock and thrill of sudden speed." },
+        { title: "The Arching Dive", text: "Place a high pillow under your partner's lower back to maximize the elevation angle, then drive straight in with rhythmic, firm pressure.", tip: "Hip elevation transforms standard angles into high-intensity pathways." },
+        { title: "The Controlled Fall", text: "Lower your bodies slowly down together until you are lying completely flat, maintaining deep connection throughout the descent.", tip: "Combining high-heat movement with slow descents creates a dramatic contrast." },
+        { title: "The Impulse Wave", text: "Deliver three rapid pulses of movement followed by three seconds of total stillness, repeating this wave pattern for two minutes.", tip: "Patterned unpredictability keeps attention locked entirely on physical sensations." },
+        { title: "The Edge Lock", text: "Hold your position entirely motionless at the point of maximum depth, breathing together synchronously until the sensation peaks.", tip: "Stillness at high tension points creates an exquisite psychological test." },
+        { title: "The Velocity Swap", text: "Alternate every thirty seconds between ultra-slow, heavy grinding and fast, shallow driving movements.", tip: "Contrasting speeds prevent the body from habituating to the rhythm." },
+        { title: "The Finale Peak", text: "Commit entirely to a continuous, accelerating cadence for the final ninety seconds, building momentum without pause until completion.", tip: "Unbroken acceleration creates a powerful shared climax experience." }
+      ];
+
+      const parsedMild = mild.map((c, idx) => ({ id: globalId++, category: 'Mild', ...c, indexOffset: idx }));
+      const parsedSpicy = spicy.map((c, idx) => ({ id: globalId++, category: 'Spicy', ...c, indexOffset: idx }));
+      const parsedDeep = deep.map((c, idx) => ({ id: globalId++, category: 'Deep Connection', ...c, indexOffset: idx }));
+      const parsedWild = wild.map((c, idx) => ({ id: globalId++, category: 'Wildcards', ...c, indexOffset: idx }));
+
+      const modeSlowBurnExp = newSlowBurnCards.map((c, idx) => ({ id: globalId++, category: 'Slow Burn', ...c, indexOffset: idx }));
+      const modeSoulSyncExp = newSoulSyncCards.map((c, idx) => ({ id: globalId++, category: 'Soul Sync', ...c, indexOffset: idx }));
+      const modeMidnightExp = newMidnightExpressCards.map((c, idx) => ({ id: globalId++, category: 'Midnight Express', ...c, indexOffset: idx }));
+
+      return { 
+        all: [...parsedMild, ...parsedSpicy, ...parsedDeep, ...parsedWild, ...modeSlowBurnExp, ...modeSoulSyncExp, ...modeMidnightExp], 
+        parsedMild, 
+        parsedSpicy, 
+        parsedDeep, 
+        parsedWild,
+        modeSlowBurnExp,
+        modeSoulSyncExp,
+        modeMidnightExp
+      };
+    };
+
+      const COURSES = [
+        {
+          id: 'growth-7',
+          title: '7-Day Growth Course',
+          description: 'Foundation of connection.',
+          tasks: [
+            { day: 1, theme: "Active Listening", task: "Spend 15 minutes asking your partner about their day without offering solutions, only validating emotions." },
+            { day: 2, theme: "Gratitude Practice", task: "Write down 3 things your partner did this week that made your life easier and share them aloud." },
+            { day: 3, theme: "The Physical Touchstone", task: "Include at least 3 intentional, non-sexual physical touches (like a hand on the shoulder or a lingering hug)." },
+            { day: 4, theme: "Conflict Review", task: "Identify one recurring minor irritation and calmly discuss a 'rule' to prevent it from happening again." },
+            { day: 5, theme: "Future Dreaming", task: "Spend 20 minutes discussing a shared goal, trip, or project you want to tackle together next year." },
+            { day: 6, theme: "Appreciation Exchange", task: "Tell your partner one specific character trait you admire in them that has nothing to do with their appearance." },
+            { day: 7, theme: "The Relationship Review", task: "Discuss what worked this week and identify one new ritual you want to adopt moving forward." }
+          ]
+        },
+        {
+          id: 'conflict-resolution',
+          title: 'Art of Conflict Resolution & Harmony',
+          description: 'Learn how to turn arguments into deeper intimacy through compassionate communication.',
+          tasks: [
+            { day: 1, theme: "Active Listening", task: "Practice active listening without interrupting for 5 minutes straight." },
+            { day: 2, theme: "Emotional Triggers", task: "Identify your primary emotional trigger during arguments." },
+            { day: 3, theme: "I Statements", task: "Use 'I' statements instead of 'You' statements all day." },
+            { day: 4, theme: "Timeout Protocol", task: "Take a 10-minute timeout before reacting when feeling defensive." },
+            { day: 5, theme: "Validation Practice", task: "Validate your partner's feelings even if you disagree with their perspective." },
+            { day: 6, theme: "Stress Appreciation", task: "Write down three things you appreciate about how your partner handles stress." },
+            { day: 7, theme: "Touch & Harmony", task: "Practice physical touch (holding hands or hugging) while resolving a minor disagreement." },
+            { day: 8, theme: "Grievance Clearing", task: "Identify and apologize for a past unresolved small grievance." },
+            { day: 9, theme: "Safe Word Setup", task: "Establish a safe word or gesture to pause heavy discussions." },
+            { day: 10, theme: "Compromise Focus", task: "Focus entirely on finding a compromise rather than 'winning' an argument." },
+            { day: 11, theme: "Strength Compliment", task: "Compliment your partner on a strength they showed during a recent challenge." },
+            { day: 12, theme: "Relaxing Space", task: "Create a relaxing environment together to discuss a stressful topic." },
+            { day: 13, theme: "Retrospective Learning", task: "Revisit an old solved conflict and share what you learned from it." },
+            { day: 14, theme: "Harmony Pact", task: "Seal your harmony pact with a special date night or intimate ritual." }
+          ]
+        }
+      ];
+
+      const TROPHIES = [
+        { id: 1, name: "Starter", icon: "✨", desc: "Played your first card", check: (stats) => stats.cards >= 1 },
+        { id: 2, name: "Growth Seeker", icon: "🌱", desc: "Complete all 7 days", check: (stats) => stats.days >= 7 },
+        { id: 3, name: "Deep Thinker", icon: "🧠", desc: "Write 7 reflections", check: (stats) => stats.refs >= 7 },
+        { id: 4, name: "Explorer", icon: "🌍", desc: "Play 50 cards", check: (stats) => stats.cards >= 50 },
+        { id: "trophy_7", name: "Midnight Voyager", icon: "🌙", desc: "Explore 10 cards in Midnight Express.", check: (stats) => stats.cards >= 10 },
+        { id: "trophy_8", name: "Conflict Master", icon: "🕊️", desc: "Complete the Conflict Resolution course.", check: (stats) => stats.conflictDone },
+        { id: "trophy_9", name: "Consistency Seeker", icon: "🔥", desc: "Maintain action streaks.", check: (stats) => stats.cards >= 5 },
+        { id: "trophy_10", name: "Vault Collector", icon: "💖", desc: "Save cards to your Favorites Vault.", check: (stats) => stats.favCount >= 1 },
+        { id: "trophy_11", name: "Deep Explorer", icon: "👑", desc: "Complete multiple course steps.", check: (stats) => stats.days >= 3 },
+        { id: "trophy_12", name: "Harmony Expert", icon: "✨", desc: "Review past completed tasks.", check: (stats) => stats.refs >= 3 }
+      ];
+
+    const DECK_RESOURCES = generateCompleteDeck();
+
+    const NotificationBanner = ({ notification, onClose }) => {
+      if (!notification) return null;
+
+      return (
+        <div className="fixed top-5 right-5 z-50 max-w-sm bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-4 animate-bounce">
+          <div className="text-3xl">{notification.icon || "🏆"}</div>
+          <div className="flex-1">
+            <h4 className="font-bold text-sm uppercase tracking-wider">{notification.title}</h4>
+            <p className="text-xs text-purple-100">{notification.message}</p>
+          </div>
+          <button 
+            onClick={onClose}
+            className="text-white hover:text-purple-200 font-bold text-lg"
+          >
+            &times;
+          </button>
+        </div>
+      );
+    };
+
+    function App() {
+      const [viewState, setViewState] = React.useState('landing'); 
+      const [gameMode, setGameMode] = React.useState(null); 
+      const [activeCategory, setActiveCategory] = React.useState('All');
+      const [currentCardIndex, setCurrentCardIndex] = React.useState(0);
+      const [isFlipped, setIsFlipped] = React.useState(false);
+      const [customDeck, setCustomDeck] = React.useState([]);
+      const [notification, setNotification] = React.useState(null);
+
+      // Custom Deck Builder State for Freestyle Sandbox
+      const [sandboxSelectedIds, setSandboxSelectedIds] = React.useState(() => {
+        // Default select first 30 cards across categories
+        return DECK_RESOURCES.all.slice(0, 30).map(c => c.id);
+      });
+      const [sandboxFilterCat, setSandboxFilterCat] = React.useState('All');
+
+      const triggerNotification = (title, message, icon) => {
+        setNotification({ title, message, icon });
+        setTimeout(() => {
+          setNotification(null);
+        }, 4000);
+      };
+
+      const handleResetProgress = () => {
+        if (window.confirm("Are you sure you want to reset all course progress and data? This action cannot be undone.")) {
+          localStorage.clear();
+          window.location.reload();
+        }
+      };
+
+      const [favorites, setFavorites] = React.useState(() => {
+        try {
+          const savedFavs = localStorage.getItem('kama_sutra_favorites');
+          return savedFavs ? JSON.parse(savedFavs) : [];
+        } catch (e) {
+          return [];
+        }
+      });
+
+      const toggleFavorite = (cardId, e) => {
+        if (e) e.stopPropagation();
+        triggerHaptic(30);
+        playSound('favorite');
+        
+        let updatedFavs;
+        if (favorites.includes(cardId)) {
+          updatedFavs = favorites.filter(id => id !== cardId);
+        } else {
+          updatedFavs = [...favorites, cardId];
+          if (updatedFavs.length === 1) {
+            triggerNotification("Vault Collector", "Saved your first favorite card!", "💖");
+          }
+        }
+        setFavorites(updatedFavs);
+        try {
+          localStorage.setItem('kama_sutra_favorites', JSON.stringify(updatedFavs));
+        } catch (err) {}
+      };
+
+      const [selectedCourse, setSelectedCourse] = React.useState(null);
+      const [selectedDay, setSelectedDay] = React.useState(null);
+      const [completedDays, setCompletedDays] = React.useState([]);
+      const [reflections, setReflections] = React.useState({});
+      
+      const [totalCardsPlayed, setTotalCardsPlayed] = React.useState(() => {
+        const saved = localStorage.getItem('totalCardsPlayed');
+        return saved ? parseInt(saved) : 0;
+      });
+
+      React.useEffect(() => {
+        if (selectedCourse) {
+          setCompletedDays(JSON.parse(localStorage.getItem(`progress-${selectedCourse.id}`) || '[]'));
+          setReflections(JSON.parse(localStorage.getItem(`refs-${selectedCourse.id}`) || '{}'));
+        }
+      }, [selectedCourse]);
+
+      const toggleComplete = (day) => {
+        const isCurrentlyDone = completedDays.includes(day);
+        const newProgress = isCurrentlyDone 
+          ? completedDays.filter(d => d !== day) 
+          : [...completedDays, day];
+          
+        setCompletedDays(newProgress);
+        localStorage.setItem(`progress-${selectedCourse.id}`, JSON.stringify(newProgress));
+
+        if (!isCurrentlyDone) {
+          triggerNotification("Task Completed!", `You finished Day ${day} of ${selectedCourse.title}`, "✨");
+          if (selectedCourse.id === 'conflict-resolution' && newProgress.length === 14) {
+            localStorage.setItem('conflict_done', 'true');
+            triggerNotification("Course Completed!", "You completed the Art of Conflict Resolution course!", "🕊️");
+          }
+        }
+      };
+
+      const updateReflection = (day, text) => {
+        const newReflections = { ...reflections, [day]: text };
+        setReflections(newReflections);
+        localStorage.setItem(`refs-${selectedCourse.id}`, JSON.stringify(newReflections));
+      };
+
+      const initiateGameMode = (mode) => {
+        setGameMode(mode);
+        triggerHaptic(20);
+        playSound('click');
+        
+        if (mode === 'slow_burn') {
+          setCustomDeck([...DECK_RESOURCES.modeSlowBurnExp]);
+        } 
+        else if (mode === 'soul_sync') {
+          setCustomDeck([...DECK_RESOURCES.modeSoulSyncExp]);
+        } 
+        else if (mode === 'midnight_express') {
+          setCustomDeck([...DECK_RESOURCES.modeMidnightExp]);
+        } 
+        else if (mode === 'favorites') {
+          const favCards = DECK_RESOURCES.all.filter(c => favorites.includes(c.id));
+          setCustomDeck(favCards.length > 0 ? favCards : [DECK_RESOURCES.all[0]]);
+        }
+        else if (mode === 'random_10') {
+          // 10 random mild, 10 random deep, 10 random spicy, 2 random wild
+          const shuffledMild = [...DECK_RESOURCES.parsedMild].sort(() => 0.5 - Math.random()).slice(0, 10);
+          const shuffledDeep = [...DECK_RESOURCES.parsedDeep].sort(() => 0.5 - Math.random()).slice(0, 10);
+          const shuffledSpicy = [...DECK_RESOURCES.parsedSpicy].sort(() => 0.5 - Math.random()).slice(0, 10);
+          const shuffledWild = [...DECK_RESOURCES.parsedWild].sort(() => 0.5 - Math.random()).slice(0, 2);
+
+          const combined = [...shuffledMild, ...shuffledDeep, ...shuffledSpicy, ...shuffledWild].sort(() => 0.5 - Math.random());
+          setCustomDeck(combined);
+        }
+        else if (mode === 'freestyle_sandbox') {
+          const chosenCards = DECK_RESOURCES.all.filter(c => sandboxSelectedIds.includes(c.id));
+          setCustomDeck(chosenCards.length > 0 ? chosenCards : [DECK_RESOURCES.all[0]]);
+        }
+        else {
+          setCustomDeck(DECK_RESOURCES.all);
+        }
+
+        setCurrentCardIndex(0);
+        setIsFlipped(false);
+        setActiveCategory('All');
+        setViewState('activeGame');
+      };
+
+      const filteredDeck = customDeck.filter(card => {
+        if (['slow_burn', 'soul_sync', 'midnight_express', 'favorites', 'random_10', 'freestyle_sandbox'].includes(gameMode)) {
+          return true;
+        }
+        if (activeCategory === 'All') return true;
+        if (activeCategory === 'Deep') return card.category === 'Deep Connection';
+        if (activeCategory === 'Wild') return card.category === 'Wildcards';
+        return card.category === activeCategory;
+      });
+
+      const currentCard = filteredDeck[currentCardIndex % filteredDeck.length] || DECK_RESOURCES.all[0];
+
+      const handleNextCard = () => {
+        triggerHaptic(15);
+        playSound('flip');
+        setIsFlipped(false);
+        setTimeout(() => {
+          setCurrentCardIndex((prev) => (prev + 1) % filteredDeck.length);
+          const newCount = totalCardsPlayed + 1; 
+          setTotalCardsPlayed(newCount);
+          localStorage.setItem('totalCardsPlayed', newCount);
+
+          if (newCount === 1) {
+            triggerNotification("Trophy Unlocked!", "Starter badge unlocked for playing your first card!", "✨");
+          } else if (newCount === 50) {
+            triggerNotification("Trophy Unlocked!", "Explorer badge unlocked for 50 cards played!", "🌍");
+          }
+        }, 220); 
+      };
+
+      const getModeLabel = () => {
+        if (gameMode === 'slow_burn') return 'Slow Burn';
+        if (gameMode === 'soul_sync') return 'Soul Sync';
+        if (gameMode === 'midnight_express') return 'Midnight Express';
+        if (gameMode === 'favorites') return 'Favorites Vault';
+        if (gameMode === 'random_10') return 'Random 10-10-10-2 Deck';
+        if (gameMode === 'freestyle_sandbox') return 'Freestyle Sandbox Deck';
+        return 'Standard Progression Deck';
+      };
+
+      if (viewState === 'courseView' && selectedCourse) {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-stone-950">
+            <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+            <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-3xl p-6 shadow-2xl">
+              <h2 className="text-xl font-serif font-bold text-stone-100 mb-6 text-center">{selectedCourse.title}</h2>
+              
+              <div className="mb-8 w-full">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-[9px] text-stone-500 uppercase font-mono tracking-widest">Progress</p>
+                  <p className="text-[10px] text-emerald-500 font-mono">{Math.round((completedDays.length / selectedCourse.tasks.length) * 100)}%</p>
+                </div>
+                <div className="w-full bg-stone-800 h-1 rounded-full overflow-hidden">
+                  <div className="bg-emerald-500 h-full transition-all duration-500" style={{ width: `${(completedDays.length / selectedCourse.tasks.length) * 100}%` }} />
+                </div>
+              </div>
+
+              <div className="space-y-4 mb-6 max-h-[50vh] overflow-y-auto pr-2">
+                {selectedCourse.tasks.map(d => (
+                  <div key={d.day} onClick={() => { setSelectedDay(d); setViewState('dayView'); }} 
+                       className="border-l-2 border-stone-700 pl-4 cursor-pointer hover:border-emerald-500 transition-colors">
+                    <p className="text-[10px] font-mono text-stone-500 uppercase tracking-widest">Day {d.day}: {d.theme}</p>
+                    <p className="text-xs text-stone-300 leading-relaxed mt-1">{d.task}</p>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => setViewState('courses')} className="w-full bg-stone-100 text-stone-900 py-3 rounded-xl text-[10px] uppercase font-mono font-bold tracking-widest">Back to Courses</button>
+            </div>
+          </div>
+        );
+      }
+
+      if (viewState === 'dayView' && selectedDay) {
+        const isDone = completedDays.includes(selectedDay.day);
+        const currentReflection = reflections[selectedDay.day] || "";
+
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-stone-950">
+            <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+            <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-3xl p-8 text-center text-stone-100">
+              <p className="text-[10px] font-mono text-rose-500 uppercase tracking-widest mb-2">Day {selectedDay.day}</p>
+              <h2 className="text-2xl font-serif font-bold mb-6">{selectedDay.theme}</h2>
+              <p className="text-sm text-stone-300 leading-relaxed mb-6">{selectedDay.task}</p>
+              
+              <textarea 
+                className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-xs text-stone-300 h-24 mb-6 focus:border-emerald-500 outline-none"
+                placeholder="Shared Reflection..."
+                value={currentReflection}
+                onChange={(e) => updateReflection(selectedDay.day, e.target.value)}
+              />
+              
+              <div className="space-y-3">
+                <button onClick={() => toggleComplete(selectedDay.day)} className={`w-full py-3 rounded-xl text-[10px] uppercase font-mono font-bold tracking-widest border ${isDone ? 'border-emerald-500 text-emerald-500' : 'bg-stone-100 text-stone-900'}`}>
+                  {isDone ? 'Mark as Incomplete' : 'Mark Task Complete'}
+                </button>
+                <button onClick={() => setViewState('courseView')} className="w-full text-stone-500 py-3 rounded-xl text-[10px] uppercase font-mono font-bold tracking-widest">Back to Course</button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      if (viewState === 'landing') {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-stone-950 text-stone-100">
+            <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+            <h1 className="text-4xl font-serif tracking-widest text-stone-100 font-bold mb-8">KAMA SUTRA</h1>
+
+            <div className="flex flex-col gap-3 w-full max-w-xs">
+              <button 
+                onClick={() => setViewState('courses')} 
+                className="w-full bg-stone-900 border border-stone-800 text-stone-100 font-semibold py-4 rounded-xl text-xs tracking-widest uppercase font-mono hover:border-emerald-500 transition-all"
+              >
+                Courses
+              </button>
+              <button 
+                onClick={() => setViewState('consent')} 
+                className="w-full bg-stone-100 text-stone-900 font-semibold py-4 rounded-xl text-xs tracking-widest uppercase font-mono"
+              >
+                Enter Deck
+              </button>
+              {favorites.length > 0 && (
+                <button 
+                  onClick={() => initiateGameMode('favorites')} 
+                  className="w-full bg-rose-950/40 border border-rose-900/50 text-rose-300 font-semibold py-4 rounded-xl text-xs tracking-widest uppercase font-mono hover:bg-rose-950/70 transition-all flex items-center justify-center gap-2"
+                >
+                  <span>♥ Favorites Vault</span>
+                  <span className="text-[10px] bg-rose-900 px-2 py-0.5 rounded-full">{favorites.length}</span>
+                </button>
+              )}
+              <button 
+                onClick={() => setViewState('trophies')} 
+                className="w-full border border-stone-800 text-stone-400 font-semibold py-4 rounded-xl text-xs tracking-widest uppercase font-mono hover:bg-stone-900 transition-all"
+              >
+                Trophy Case
+              </button>
+              <button 
+                onClick={handleResetProgress} 
+                className="w-full bg-red-950/30 border border-red-900/40 text-red-400 font-semibold py-3 rounded-xl text-[10px] tracking-widest uppercase font-mono hover:bg-red-950/50 transition-all mt-4"
+              >
+                Reset All Progress
+              </button>
+            </div>
+          </div>
+        );
+      }
+      
+      if (viewState === 'consent') {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-4">
+            <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+            <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-3xl p-6 shadow-2xl">
+              <h2 className="text-xl font-serif font-bold text-stone-100 mb-3 tracking-wide">Intimacy Framework Consent</h2>
+              <div className="h-48 overflow-y-auto pr-2 text-stone-400 text-xs space-y-3 leading-relaxed mb-6 font-sans border-b border-stone-800 pb-4">
+                <p>Welcome to Kama Sutra. Before accessing the deck blueprints, both partners must explicitly establish boundaries, security rules, and mutual dynamic comfort limits.</p>
+                <p><strong>1. Absolute Safety:</strong> You agree that either partner can explicitly discard, skip, or modify any dynamic card drawn without giving explanations or facing judgment.</p>
+                <p><strong>2. Communication:</strong> You agree to maintain active, non-judgmental validation loops throughout the journey, adjusting speed parameters to match your partner's energy levels.</p>
+                <p><strong>3. Boundaries:</strong> This experience is explicitly designed to support and deepen your connection safely. Do not cross physical comfort limits without active confirmation.</p>
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setViewState('landing')}
+                  className="flex-1 border border-stone-800 text-stone-400 py-3 rounded-xl text-[10px] font-mono tracking-widest uppercase hover:bg-stone-950 transition-all"
+                >
+                  Decline
+                </button>
+                <button 
+                  onClick={() => setViewState('moodCheck')}
+                  className="flex-1 bg-rose-600 text-stone-100 py-3 rounded-xl text-[10px] font-mono tracking-widest uppercase hover:bg-rose-700 transition-all font-bold shadow-lg"
+                >
+                  I Consent
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      if (viewState === 'moodCheck') {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-stone-950 text-stone-100">
+            <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+            <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-3xl p-6 shadow-2xl text-center">
+              <h2 className="text-2xl font-serif font-bold text-stone-100 mb-2">Energy & Mood Check-In</h2>
+              <p className="text-xs text-stone-400 mb-6">How is your energy level right now? This helps us route you to the ideal deck.</p>
+              
+              <div className="space-y-3 mb-6">
+                <button 
+                  onClick={() => initiateGameMode('slow_burn')} 
+                  className="w-full bg-purple-950/30 border border-purple-900/50 hover:border-purple-500 p-4 rounded-xl text-left transition-all group"
+                >
+                  <span className="text-xs font-serif font-bold text-purple-300 block mb-1">Low / Relaxed Energy</span>
+                  <p className="text-[11px] text-stone-400">Automatically routes to <strong className="text-stone-200">Soul Sync</strong> or <strong className="text-stone-200">Slow Burn</strong>.</p>
+                </button>
+
+                <button 
+                  onClick={() => initiateGameMode('midnight_express')} 
+                  className="w-full bg-rose-950/30 border border-rose-900/50 hover:border-rose-500 p-4 rounded-xl text-left transition-all group"
+                >
+                  <span className="text-xs font-serif font-bold text-rose-300 block mb-1">High / Adventurous Energy</span>
+                  <p className="text-[11px] text-stone-400">Automatically routes to <strong className="text-stone-200">Midnight Express</strong> or <strong className="text-stone-200">Spicy</strong>.</p>
+                </button>
+
+                <button 
+                  onClick={() => setViewState('gamemode')} 
+                  className="w-full bg-stone-950 border border-stone-800 hover:border-stone-700 p-4 rounded-xl text-left transition-all group"
+                >
+                  <span className="text-xs font-serif font-bold text-stone-200 block mb-1">Browse All Styles</span>
+                  <p className="text-[11px] text-stone-400">View all available journey and sandbox configurations manually.</p>
+                </button>
+              </div>
+
+              <button onClick={() => setViewState('consent')} className="text-[9px] font-mono tracking-widest text-stone-500 uppercase hover:text-stone-400">Back</button>
+            </div>
+          </div>
+        );
+      }
+
+      if (viewState === 'gamemode') {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-4">
+            <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+            <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-3xl p-6 shadow-2xl text-center">
+              <h2 className="text-2xl font-serif font-bold text-stone-100 mb-2">Select Your Journey Style</h2>
+              <p className="text-xs text-stone-500 mb-6">Choose how you want to experience your connection deck session.</p>
+              
+              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 no-scrollbar">
+                <button onClick={() => initiateGameMode('slow_burn')} className="w-full bg-stone-950 border border-stone-800 hover:border-stone-700 p-4 rounded-xl text-left transition-all group">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs font-serif font-bold text-stone-200 group-hover:text-purple-400 transition-colors">Slow Burn</span>
+                    <span className="text-[8px] font-mono bg-purple-950/40 text-purple-400 border border-purple-900/40 px-1.5 py-0.5 rounded">18 Exclusive Cards</span>
+                  </div>
+                  <p className="text-[11px] text-stone-400 leading-normal">Dedicated exclusively to the 18 new slow thermal and pacing expansion cards.</p>
+                </button>
+
+                <button onClick={() => initiateGameMode('soul_sync')} className="w-full bg-stone-950 border border-stone-800 hover:border-stone-700 p-4 rounded-xl text-left transition-all group">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs font-serif font-bold text-stone-200 group-hover:text-sky-400 transition-colors">Soul Sync</span>
+                    <span className="text-[8px] font-mono bg-sky-950/40 text-sky-400 border border-sky-900/40 px-1.5 py-0.5 rounded">18 Exclusive Cards</span>
+                  </div>
+                  <p className="text-[11px] text-stone-400 leading-normal">Dedicated exclusively to the 18 new deep conversational vulnerability and connection cards.</p>
+                </button>
+
+                <button onClick={() => initiateGameMode('midnight_express')} className="w-full bg-stone-950 border border-stone-800 hover:border-stone-700 p-4 rounded-xl text-left transition-all group">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs font-serif font-bold text-stone-200 group-hover:text-rose-400 transition-colors">Midnight Express</span>
+                    <span className="text-[8px] font-mono bg-rose-950/40 text-rose-400 border border-rose-900/40 px-1.5 py-0.5 rounded">18 Exclusive Cards</span>
+                  </div>
+                  <p className="text-[11px] text-stone-400 leading-normal">Dedicated exclusively to the 18 new high-intensity velocity and passion expansion cards.</p>
+                </button>
+
+                {favorites.length > 0 && (
+                  <button onClick={() => initiateGameMode('favorites')} className="w-full bg-stone-950 border border-rose-900/40 hover:border-rose-800 p-4 rounded-xl text-left transition-all group">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-serif font-bold text-rose-300 group-hover:text-rose-200 transition-colors">Favorites Vault</span>
+                      <span className="text-[8px] font-mono bg-rose-950/60 text-rose-400 border border-rose-900 px-1.5 py-0.5 rounded">{favorites.length} Saved</span>
+                    </div>
+                    <p className="text-[11px] text-stone-400 leading-normal">Replay your bookmarked session favorites tagged with heart icons.</p>
+                  </button>
+                )}
+
+                <button onClick={() => setViewState('standardProgressionMenu')} className="w-full bg-stone-950 border border-stone-800 hover:border-stone-700 p-4 rounded-xl text-left transition-all group">
+                  <h3 className="text-xs font-serif font-bold text-stone-200 mb-1 group-hover:text-emerald-400 transition-colors">Standard Progression Deck</h3>
+                  <p className="text-[11px] text-stone-400 leading-normal">Choose between a random 10-10-10-2 deck or custom-building your own session deck layout.</p>
+                </button>
+              </div>
+
+              <button onClick={() => setViewState('moodCheck')} className="mt-6 text-[9px] font-mono tracking-widest text-stone-500 uppercase hover:text-stone-400">Back to Mood Check</button>
+            </div>
+          </div>
+        );
+      }
+
+      if (viewState === 'standardProgressionMenu') {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-4">
+            <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+            <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-3xl p-6 shadow-2xl text-center">
+              <h2 className="text-2xl font-serif font-bold text-stone-100 mb-2">Standard Progression Deck</h2>
+              <p className="text-xs text-stone-500 mb-6">Select your preferred session generation format.</p>
+
+              <div className="space-y-3 mb-6">
+                <button 
+                  onClick={() => initiateGameMode('random_10')} 
+                  className="w-full bg-stone-950 border border-stone-800 hover:border-emerald-500 p-4 rounded-xl text-left transition-all group"
+                >
+                  <span className="text-xs font-serif font-bold text-stone-200 group-hover:text-emerald-400 block mb-1">Random 10-10-10-2 Deck</span>
+                  <p className="text-[11px] text-stone-400 leading-normal">Randomly generates 10 Mild, 10 Deep, 10 Spicy, and 2 Wild cards each time.</p>
+                </button>
+
+                <button 
+                  onClick={() => setViewState('freestyleBuilder')} 
+                  className="w-full bg-stone-950 border border-stone-800 hover:border-emerald-500 p-4 rounded-xl text-left transition-all group"
+                >
+                  <span className="text-xs font-serif font-bold text-stone-200 group-hover:text-emerald-400 block mb-1">Freestyle Sandbox</span>
+                  <p className="text-[11px] text-stone-400 leading-normal">Pick and choose up to 30 individual cards from any category, add or remove at will.</p>
+                </button>
+              </div>
+
+              <button onClick={() => setViewState('gamemode')} className="text-[9px] font-mono tracking-widest text-stone-500 uppercase hover:text-stone-400">Back to Styles</button>
+            </div>
+          </div>
+        );
+      }
+
+      if (viewState === 'freestyleBuilder') {
+        const toggleSandboxCard = (cardId) => {
+          if (sandboxSelectedIds.includes(cardId)) {
+            setSandboxSelectedIds(sandboxSelectedIds.filter(id => id !== cardId));
+          } else {
+            if (sandboxSelectedIds.length >= 30) {
+              triggerNotification("Limit Reached", "Freestyle sandbox can hold up to 30 cards.", "⚠️");
+              return;
+            }
+            setSandboxSelectedIds([...sandboxSelectedIds, cardId]);
+          }
+        };
+
+        const availablePool = DECK_RESOURCES.all.filter(c => {
+          if (sandboxFilterCat === 'All') return true;
+          if (sandboxFilterCat === 'Deep') return c.category === 'Deep Connection';
+          if (sandboxFilterCat === 'Wild') return c.category === 'Wildcards';
+          return c.category === sandboxFilterCat;
+        });
+
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-4">
+            <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+            <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-3xl p-6 shadow-2xl flex flex-col max-h-[90vh]">
+              <div className="text-center mb-4">
+                <h2 className="text-xl font-serif font-bold text-stone-100 mb-1">Freestyle Sandbox</h2>
+                <p className="text-[11px] text-emerald-400 font-mono">Selected: {sandboxSelectedIds.length} / 30 cards</p>
+              </div>
+
+              {/* Category Filter Chips */}
+              <div className="flex gap-1 mb-3 text-[9px] font-mono overflow-x-auto no-scrollbar shrink-0">
+                {['All', 'Mild', 'Spicy', 'Deep Connection', 'Wildcards'].map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSandboxFilterCat(cat)}
+                    className={`px-2.5 py-1 rounded-lg border whitespace-nowrap transition-all ${
+                      sandboxFilterCat === cat 
+                        ? 'bg-stone-800 border-emerald-500 text-stone-100 font-bold' 
+                        : 'bg-stone-950 border-stone-800 text-stone-500'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              {/* Cards Checklist Container */}
+              <div className="space-y-2 mb-4 overflow-y-auto pr-1 flex-1 no-scrollbar">
+                {availablePool.map(card => {
+                  const isSelected = sandboxSelectedIds.includes(card.id);
+                  return (
+                    <div 
+                      key={card.id}
+                      onClick={() => toggleSandboxCard(card.id)}
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-3 ${
+                        isSelected 
+                          ? 'bg-stone-800/85 border-emerald-500/80 text-stone-100' 
+                          : 'bg-stone-950 border-stone-800 text-stone-500 hover:border-stone-700'
+                      }`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-[8px] font-mono px-1.5 py-0.2 bg-stone-900 border border-stone-800 rounded uppercase">{card.category}</span>
+                          <p className="text-xs font-serif font-bold text-stone-200 truncate">{card.title}</p>
+                        </div>
+                        <p className="text-[10px] text-stone-400 truncate">{card.text}</p>
+                      </div>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border text-xs font-bold ${
+                        isSelected ? 'bg-emerald-500 border-emerald-400 text-stone-950' : 'border-stone-700 bg-stone-900 text-stone-600'
+                      }`}>
+                        {isSelected ? '✓' : '+'}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex gap-3 shrink-0">
+                <button 
+                  onClick={() => setViewState('standardProgressionMenu')}
+                  className="flex-1 border border-stone-800 text-stone-400 py-3 rounded-xl text-[10px] font-mono tracking-widest uppercase hover:bg-stone-950 transition-all"
+                >
+                  Back
+                </button>
+                <button 
+                  onClick={() => {
+                    if (sandboxSelectedIds.length === 0) {
+                      triggerNotification("Empty Deck", "Please select at least 1 card to play.", "⚠️");
+                      return;
+                    }
+                    initiateGameMode('freestyle_sandbox');
+                  }}
+                  className="flex-1 bg-emerald-600 text-stone-100 py-3 rounded-xl text-[10px] font-mono tracking-widest uppercase hover:bg-emerald-700 transition-all font-bold shadow-lg"
+                >
+                  Start Sandbox
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      if (viewState === 'courses') {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-stone-950 text-stone-100">
+            <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+            <h2 className="text-2xl font-serif font-bold mb-8">Training Modules</h2>
+            <div className="w-full max-w-sm space-y-4 mb-8">
+              {COURSES.map(course => (
+                <button 
+                  key={course.id} 
+                  onClick={() => {
+                    setSelectedCourse(course);
+                    setViewState('courseView');
+                  }}
+                  className="w-full bg-stone-900 border border-stone-800 p-6 rounded-2xl text-left hover:border-emerald-500 transition-all"
+                >
+                  <h3 className="text-lg font-serif text-stone-100">{course.title}</h3>
+                  <p className="text-xs text-stone-400 mt-2">{course.description}</p>
+                </button>
+              ))}
+            </div>
+            <button 
+              onClick={() => setViewState('landing')} 
+              className="text-stone-500 text-[10px] uppercase tracking-widest font-mono"
+            >
+              Back to Home
+            </button>
+          </div>
+        );
+      }
+
+      if (viewState === 'trophies') {
+        const stats = { 
+          cards: totalCardsPlayed, 
+          days: completedDays.length, 
+          refs: Object.keys(reflections).length,
+          conflictDone: localStorage.getItem('conflict_done') === 'true',
+          favCount: favorites.length
+        };
+        
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-6">
+            <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+            <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-3xl p-6 shadow-2xl">
+              <h2 className="text-xl font-serif font-bold text-stone-100 mb-6 text-center">Trophy Case</h2>
+              <div className="grid grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto pr-1">
+                {TROPHIES.map(t => {
+                  const unlocked = t.check(stats);
+                  return (
+                    <div key={t.id} className={`flex flex-col items-center p-4 rounded-2xl border transition-all ${unlocked ? 'bg-stone-800 border-emerald-900/50 shadow-[0_0_15px_rgba(16,185,129,0.1)] trophy-unlocked' : 'bg-stone-950 border-stone-800 grayscale opacity-60'}`}>
+                      <div className="text-4xl mb-3">{t.icon}</div>
+                      <p className={`font-serif font-bold text-center text-sm ${unlocked ? 'text-stone-100' : 'text-stone-600'}`}>{t.name}</p>
+                      <p className="text-[9px] text-stone-500 text-center mt-1">{t.desc}</p>
+                    </div>
+                  );
+                })}
+              </div>
+              <button onClick={() => setViewState('landing')} className="mt-8 w-full bg-stone-100 text-stone-900 py-3 rounded-xl text-[10px] uppercase font-mono font-bold tracking-widest">Back to Menu</button>
+            </div>
+          </div>
+        );
+      }
+      
+      const isCurrentCardFavorite = favorites.includes(currentCard.id);
+
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-rose-500/30">
+          <NotificationBanner notification={notification} onClose={() => setNotification(null)} />
+          <header className="mb-4 text-center select-none flex flex-col items-center">
+            <h1 className="text-2xl font-serif tracking-widest text-stone-200 font-bold">KAMA SUTRA</h1>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[8px] font-mono uppercase bg-stone-900 px-2 py-0.5 rounded text-stone-400 border border-stone-800/60">
+                Mode: {getModeLabel()}
+              </span>
+              <button 
+                onClick={() => setViewState('moodCheck')} 
+                className="text-[8px] font-mono uppercase bg-stone-900 hover:bg-stone-800 px-2 py-0.5 rounded text-rose-400 border border-stone-800/60 transition-all"
+              >
+                Change Mode
+              </button>
+            </div>
+          </header>
+
+          <main className="w-full max-w-sm bg-stone-900 border border-stone-800/80 rounded-3xl p-5 shadow-2xl flex flex-col items-center relative">
+            
+            <button 
+              onClick={(e) => toggleFavorite(currentCard.id, e)}
+              className={`absolute top-8 right-8 z-20 w-9 h-9 rounded-full flex items-center justify-center border transition-all shadow-md backdrop-blur-md ${
+                isCurrentCardFavorite 
+                  ? 'bg-rose-950/80 border-rose-500 text-rose-400 scale-105' 
+                  : 'bg-stone-950/80 border-stone-800 text-stone-500 hover:text-stone-300'
+              }`}
+              title={isCurrentCardFavorite ? "Remove from Favorites" : "Add to Favorites"}
+            >
+              <span className="text-sm">{isCurrentCardFavorite ? '♥' : '♡'}</span>
+            </button>
+
+            {['slow_burn', 'soul_sync', 'midnight_express', 'favorites', 'random_10', 'freestyle_sandbox'].includes(gameMode) ? (
+              <div className="w-full bg-stone-950/40 py-2 px-3 rounded-xl mb-5 text-center border border-stone-800/30">
+                <p className="text-[9px] text-stone-500 font-mono tracking-wider uppercase">
+                  Deck Progress: Card {currentCardIndex + 1} of {filteredDeck.length}
+                </p>
+              </div>
+            ) : (
+              <div className="w-full bg-stone-950 p-1 rounded-xl flex gap-1 mb-5 text-[10px] font-medium border border-stone-800/40 overflow-x-auto no-scrollbar">
+                {['All', 'Mild', 'Spicy', 'Deep', 'Wild', 'Slow Burn', 'Soul Sync', 'Midnight Express'].map((cat) => {
+                  const isActive = activeCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => { setActiveCategory(cat); setCurrentCardIndex(0); setIsFlipped(false); }}
+                      className={`flex-1 px-2.5 py-1.5 rounded-lg text-center whitespace-nowrap transition-all duration-200 ${isActive ? 'bg-stone-800 text-stone-100 font-semibold border border-stone-700/50 shadow-md' : 'text-stone-500 hover:text-stone-400'}`}
+                    >
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <div onClick={() => { setIsFlipped(!isFlipped); triggerHaptic(10); playSound('flip'); }} className="w-full aspect-[3/4] cursor-pointer mb-5 perspective-1000 select-none">
+              <div className={`w-full h-full relative transition-transform duration-500 preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+                <div className="absolute inset-0 w-full h-full backface-hidden border border-stone-800 rounded-2xl bg-stone-950 p-4 flex flex-col justify-between shadow-xl">
+                  <div className="w-full h-52 rounded-xl overflow-hidden border border-stone-800/40 bg-stone-900 flex items-center justify-center">
+                    <CodeIllustration category={currentCard.category} id={currentCard.id} />
+                  </div>
+                  <div className="text-center pb-2">
+                    <span className={`text-[8px] tracking-widest uppercase font-mono px-2 py-0.5 rounded border mb-2 inline-block ${
+                      currentCard.category === 'Spicy' || currentCard.category === 'Midnight Express' ? 'bg-rose-950/30 text-rose-400 border-rose-900/40' : 
+                      currentCard.category === 'Mild' || currentCard.category === 'Slow Burn' ? 'bg-emerald-950/30 text-emerald-400 border-emerald-900/40' : 
+                      currentCard.category === 'Wildcards' ? 'bg-purple-950/30 text-purple-400 border-purple-900/40' : 
+                      'bg-sky-950/30 text-sky-400 border-sky-900/40'
+                    }`}>
+                      {currentCard.category}
+                    </span>
+                    <p className="text-base text-stone-200 font-serif font-bold mb-1 tracking-wide">{currentCard.title}</p>
+                    <p className="text-[9px] text-stone-600 tracking-widest uppercase font-mono">Tap Card to Flip</p>
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 border border-stone-800 rounded-2xl bg-stone-950 p-5 flex flex-col justify-between shadow-xl">
+                  <div>
+                    <div className="flex justify-between items-center mb-4 border-b border-stone-900 pb-2">
+                      <span className="text-[8px] text-stone-500 font-bold uppercase tracking-widest font-mono">Action Instructions</span>
+                      <span className="text-[9px] text-stone-600 font-mono font-bold">CARD #{String(currentCard.id).padStart(3, '0')}</span>
+                    </div>
+                    <h3 className="text-lg font-serif font-bold text-stone-100 mb-2.5 leading-tight">{currentCard.title}</h3>
+                    <p className="text-xs text-stone-300 leading-relaxed font-sans font-normal tracking-wide">{currentCard.text}</p>
+                  </div>
+                  <div className="bg-stone-900/90 border border-stone-800/60 p-3.5 rounded-xl">
+                    <span className="text-[8px] text-stone-400 font-bold block mb-1 tracking-widest font-mono uppercase">ALIGNMENT TIP</span>
+                    <p className="text-[11px] text-stone-500 leading-normal italic font-sans">{currentCard.tip}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={(e) => { e.stopPropagation(); handleNextCard(); }}
+              className="w-full bg-stone-100 text-stone-900 font-semibold py-3.5 rounded-xl text-xs tracking-widest uppercase font-mono shadow-xl hover:bg-stone-200 transition-all active:scale-[0.99]"
+            >
+              Next Card
+            </button>
+          </main>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
